@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090909">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finance Control">
+<meta name="format-detection" content="telephone=no">
+<title>Finance Control — Dashboard Financeiro com IA</title>
+<style>
+:root{--bg:#0d0d0d;--panel:#171717;--panel2:#202020;--line:#303030;--gold:#f2c629;--muted:#a5a5a5;--white:#f4f4f4;--red:#ff7777;--green:#b6e36a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:14px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1120px;margin:auto;padding:20px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.brand{color:var(--gold);font-weight:800;letter-spacing:1.5px;font-size:12px}
+.heading{font-size:25px;font-weight:750;margin:5px 0 3px}
+.sub{color:var(--muted);font-size:12px;line-height:1.5}
+.status{border:1px solid #5b4b18;color:var(--gold);padding:7px 10px;border-radius:20px;font-size:11px;white-space:nowrap}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolbar select{width:auto;min-width:165px}
+select,input{background:#101010;border:1px solid #383838;color:var(--white);padding:10px 11px;border-radius:8px;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--gold)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 9px;margin:10px 0 16px;scrollbar-width:thin}
+.tab,.btn{border:1px solid #383838;background:#171717;color:#eee;border-radius:8px;padding:9px 12px;white-space:nowrap;font-size:12px}
+.tab.active,.btn.primary{background:var(--gold);border-color:var(--gold);color:#111;font-weight:750}
+.btn:hover,.tab:hover{border-color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.card,.compare,.chartbox{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;min-width:0}
+.metric-label{font-size:10px;color:var(--muted);letter-spacing:.8px}
+.metric{font-size:clamp(18px,2.3vw,24px);font-weight:750;margin:8px 0 3px;overflow-wrap:anywhere}
+.gold{color:var(--gold)}.red{color:var(--red)}.green{color:var(--green)}
+.section{margin-top:14px}
+.section-title{font-size:15px;font-weight:700;margin:0 0 10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}
+.compare-values{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}
+.compare-values strong{font-size:clamp(15px,2vw,21px)}
+.arrow{font-size:26px;color:var(--gold)}
+.signal{display:flex;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:11px}
+.signal-icon{font-size:25px}
+.signal strong{display:block;font-size:14px}
+.signal small{color:var(--muted);font-size:11px}
+.chartbox canvas{width:100%;height:230px;display:block}
+.category-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.category{background:#141414;border:1px solid #2b2b2b;border-radius:9px;padding:11px}
+.category-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:12px}
+.category-head span:last-child{color:var(--gold);font-weight:700}
+.category input{font-weight:650}
+.progress{height:7px;background:#383838;border-radius:99px;overflow:hidden}
+.progress>span{height:100%;display:block;background:var(--gold);border-radius:99px}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.field label{display:block;color:var(--muted);font-size:11px;margin:0 0 5px}
+.field.full{grid-column:1/-1}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+.right{text-align:right}
+.delete{background:none;border:0;color:var(--red);font-size:17px}
+.notice{color:var(--muted);font-size:11px;line-height:1.5;margin-top:15px}
+.empty{color:var(--muted);padding:18px;text-align:center}
+.hidden{display:none!important}
+.chat-shell{padding:12px}
+.chat-messages{height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:3px 2px 12px}
+.chat-bubble{max-width:88%;padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.chat-bubble.bot{align-self:flex-start;background:#242424;border:1px solid #383838}
+.chat-bubble.user{align-self:flex-end;background:#332b11;border:1px solid #67551b}
+.chat-form{display:flex;gap:7px;border-top:1px solid var(--line);padding-top:10px}
+.chat-form input{flex:1;min-width:0}
+.chat-hint{font-size:10px;color:var(--muted);margin-top:8px}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.heading{font-size:22px}.app{padding:16px 12px 32px}}
+@media(max-width:430px){.category-list,.formgrid{grid-template-columns:1fr}.status{display:none}.metric{font-size:19px}.tab{padding:8px 10px}}
+</style>
+<link rel="manifest" href="./manifest.webmanifest">
+</head>
+<body>
+<div class="app">
+<header>
+ <div><div class="brand">◆ FINANCE CONTROL</div><div class="heading">Meu financeiro</div><div class="sub">Controle inteligente de receitas, despesas e resultados</div></div>
+ <div class="status">● PAINEL EDITÁVEL</div>
+</header>
+<div class="toolbar">
+ <select id="month" aria-label="Mês atual">
+  <option>Novembro 2026</option><option>Outubro 2026</option><option>Setembro 2026</option><option>Agosto 2026</option><option>Julho 2026</option><option>Junho 2026</option><option>Maio 2026</option><option>Abril 2026</option><option>Março 2026</option><option>Fevereiro 2026</option><option>Janeiro 2026</option>
+ </select>
+ <button class="btn" id="exportCsv">Exportar lançamentos CSV</button>
+ <button class="btn" id="reset">Restaurar demonstração</button>
+</div>
+<nav class="tabs" aria-label="Navegação">
+ <button class="tab active" data-page="overview">Resumo</button><button class="tab" data-page="income">Receitas</button><button class="tab" data-page="expenses">Despesas</button><button class="tab" data-page="comparison">Comparativo</button><button class="tab" data-page="editValues">✎ Editar valores</button><button class="tab" data-page="assistant">💬 Chat financeiro</button><button class="tab" data-page="transactions">Lançamentos</button>
+</nav>
+<main>
+<section id="overview">
+ <div class="grid">
+  <div class="card"><div class="metric-label">RECEITAS</div><div class="metric gold" id="mRevenue">R$ 0,00</div><div class="sub">Entradas do período</div></div>
+  <div class="card"><div class="metric-label">DESPESAS</div><div class="metric" id="mExpenses">R$ 0,00</div><div class="sub">Saídas do período</div></div>
+  <div class="card"><div class="metric-label">SALDO ATUAL</div><div class="metric gold" id="mBalance">R$ 0,00</div><div class="sub">Receitas menos despesas</div></div>
+  <div class="card"><div class="metric-label">MARGEM</div><div class="metric gold" id="mMargin">0,0%</div><div class="sub">Saldo sobre receitas</div></div>
+ </div>
+ <div class="section two">
+  <div class="compare">
+   <div class="section-title">Comparativo com o mês anterior</div>
+   <div class="compare-top"><span id="previousLabel">Mês anterior</span><span id="currentLabel">Mês atual</span></div>
+   <div class="compare-values"><strong id="previousValue">R$ 0,00</strong><span class="arrow">→</span><strong class="gold" id="currentValue">R$ 0,00</strong></div>
+   <div class="signal"><div class="signal-icon" id="signalIcon">↗</div><div><strong id="signalTitle">Resultado estável</strong><small id="signalText">Variação em relação ao mês anterior</small></div></div>
+   <div class="metric gold" id="variation">0,0%</div><div class="sub">Variação do saldo mensal</div>
+  </div>
+  <div class="card">
+   <div class="section-title">Meta de saldo</div>
+   <div class="field"><label for="goal">Meta (R$)</label><input id="goal" type="number" min="0" step="0.01" value="10000"></div>
+   <div class="metric gold" id="goalPercent">0%</div>
+   <div class="progress"><span id="goalBar" style="width:0%"></span></div>
+   <div class="sub" id="goalRemaining">Defina sua meta para acompanhar o progresso.</div>
+  </div>
+ </div>
+ <div class="section two">
+  <div class="chartbox"><div class="section-title">Saldo: mês anterior × atual</div><canvas id="comparisonChart"></canvas></div>
+  <div class="chartbox"><div class="section-title">Receitas × despesas</div><canvas id="cashChart"></canvas></div>
+ </div>
+</section>
+<section id="income" class="hidden">
+ <div class="section-title">Categorias de receitas</div><p class="sub">Edite os valores recebidos em cada categoria. Os totais e gráficos serão atualizados automaticamente.</p>
+ <div class="category-list" id="incomeCategories"></div>
+ <div class="card section"><div class="metric-label">TOTAL DE RECEITAS</div><div class="metric gold" id="incomeTotal">R$ 0,00</div></div>
+</section>
+<section id="expenses" class="hidden">
+ <div class="section-title">Categorias de despesas</div><p class="sub">Edite os valores gastos em cada categoria.</p>
+ <div class="category-list" id="expenseCategories"></div>
+ <div class="card section"><div class="metric-label">TOTAL DE DESPESAS</div><div class="metric gold" id="expenseTotal">R$ 0,00</div></div>
+ <div class="chartbox section"><div class="section-title">Distribuição das despesas</div><canvas id="expenseChart"></canvas></div>
+</section>
+<section id="comparison" class="hidden">
+ <div class="section-title">Comparação mensal</div>
+ <div class="card">
+  <div class="formgrid">
+   <div class="field"><label for="previousMonth">Nome do mês anterior</label><input id="previousMonth" value="Outubro 2026"></div>
+   <div class="field"><label for="previousBalance">Saldo do mês anterior (R$)</label><input id="previousBalance" type="number" step="0.01" value="18000"></div>
+  </div>
+ </div>
+ <div class="chartbox section"><div class="section-title">Evolução do saldo</div><canvas id="comparisonChart2"></canvas></div>
+ <div class="compare section"><div class="signal"><div class="signal-icon" id="signalIcon2">↗</div><div><strong id="signalTitle2">Resultado estável</strong><small id="signalText2">Comparação automática</small></div></div><div class="metric gold" id="variation2">0%</div></div>
+</section>
+<section id="editValues" class="hidden">
+ <div class="section-title">Editar todos os valores</div>
+ <p class="sub">Digite diretamente nos campos. Os totais, indicadores e gráficos são atualizados automaticamente e salvos neste navegador.</p>
+ <div class="section-title section gold">Receitas</div>
+ <div class="category-list" id="quickIncomeCategories"></div>
+ <div class="card section"><div class="metric-label">TOTAL DE RECEITAS</div><div class="metric gold" id="quickIncomeTotal">R$ 0,00</div></div>
+ <div class="section-title section gold">Despesas</div>
+ <div class="category-list" id="quickExpenseCategories"></div>
+ <div class="card section"><div class="metric-label">TOTAL DE DESPESAS</div><div class="metric gold" id="quickExpenseTotal">R$ 0,00</div></div>
+ <div class="section-title section gold">Comparativo</div>
+ <div class="card">
+  <div class="formgrid">
+   <div class="field"><label for="quickPreviousMonth">Mês anterior</label><input id="quickPreviousMonth" value="Outubro 2026"></div>
+   <div class="field"><label for="quickPreviousBalance">Saldo anterior (R$)</label><input id="quickPreviousBalance" type="number" step="0.01" value="18000"></div>
+  </div>
+ </div>
+</section>
+
+<section id="assistant" class="hidden">
+ <div class="section-title">💬 Chat financeiro</div>
+ <p class="sub">Converse com a IA sobre seus números, peça análises e solicite alterações no painel. Alterações sugeridas sempre pedem sua confirmação.</p>
+ <div class="card chat-shell">
+  <div class="field" style="margin-bottom:10px">
+   <label for="chatAccessCode">Código privado de acesso ao chat</label>
+   <input id="chatAccessCode" type="password" autocomplete="off" placeholder="Digite o código configurado no servidor">
+  </div>
+  <div id="chatMessages" class="chat-messages" aria-live="polite">
+   <div class="chat-bubble bot"><strong>Finance Control AI</strong><br>Olá! Sou seu assistente financeiro. Posso analisar receitas, despesas, saldo, metas e lançamentos. Também posso sugerir alterações para você confirmar.</div>
+  </div>
+  <form id="chatForm" class="chat-form">
+   <input id="chatInput" autocomplete="off" placeholder="Ex.: onde estou gastando mais?" aria-label="Mensagem para o chat financeiro">
+   <button class="btn primary" id="chatSend" type="submit">Enviar</button>
+  </form>
+  <div class="chat-hint">A IA recebe os valores e categorias do painel para responder com contexto. Não envie senhas, dados bancários ou informações pessoais.</div>
+ </div>
+ <div class="section card">
+  <div class="section-title">O que posso atualizar pelo chat?</div>
+  <div class="sub">• Análise de receitas, despesas e saldo<br>• Identificação das categorias com maiores gastos<br>• Comparação entre meses e acompanhamento de metas<br>• Sugestões de ajustes e novos lançamentos<br>• Alterações aplicadas somente depois da sua confirmação</div>
+ </div>
+</section>
+
+<section id="transactions" class="hidden">
+ <div class="section-title">Adicionar lançamento</div>
+ <div class="card">
+  <div class="formgrid">
+   <div class="field full"><label for="description">Descrição</label><input id="description" placeholder="Ex.: Compra de cartas"></div>
+   <div class="field"><label for="type">Tipo</label><select id="type"><option>Receita</option><option>Despesa</option></select></div>
+   <div class="field"><label for="category">Categoria</label><select id="category"></select></div>
+   <div class="field"><label for="amount">Valor (R$)</label><input id="amount" type="number" min="0.01" step="0.01" placeholder="0,00"></div>
+   <div class="field"><label for="date">Data</label><input id="date" type="date"></div>
+  </div>
+  <div class="actions"><button class="btn primary" id="addTransaction">＋ Adicionar lançamento</button></div>
+ </div>
+ <div class="section-title section">Histórico de lançamentos</div>
+ <div class="card table-wrap"><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo / categoria</th><th class="right">Valor</th><th></th></tr></thead><tbody id="transactionRows"></tbody></table><div class="empty" id="emptyTransactions">Nenhum lançamento cadastrado ainda.</div></div>
+</section>
+</main>
+<p class="notice">No iPhone, para usar todos os recursos, abra esta página por um endereço HTTPS no Safari. Seus dados são salvos neste navegador usando armazenamento local. Para manter uma cópia, use “Exportar lançamentos CSV” periodicamente. Os valores iniciais são apenas demonstrativos. O saldo mensal é calculado pelas categorias editadas mais os lançamentos cadastrados.</p>
+</div>
+<script>
+const incomeNames=['Presentes','Emprestado','Salário','Outros','Cartas','Rolo'];
+const expenseNames=['Dívidas','Parcelad','Cartas','Comida','Saídas','Roupas','Lazer','Jogos','Outros'];
+const demo={income:[500,1000,8000,1500,5000,9000],expenses:[2500,1800,3000,1500,800,700,900,1200,1600],previousMonth:'Outubro 2026',previousBalance:18000,goal:10000,transactions:[],month:'Novembro 2026'};
+let state=load();
+function cloneData(value){return JSON.parse(JSON.stringify(value))}
+function load(){try{const s=JSON.parse(localStorage.getItem('financeControlData'));return s?{...cloneData(demo),...s}:cloneData(demo)}catch{return cloneData(demo)}}
+function save(){localStorage.setItem('financeControlData',JSON.stringify(state))}
+const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const sum=a=>a.reduce((x,y)=>x+Number(y||0),0);
+const extra=(type)=>sum(state.transactions.filter(t=>t.type===type).map(t=>t.value));
+const revenue=()=>sum(state.income)+extra('Receita');
+const expenses=()=>sum(state.expenses)+extra('Despesa');
+const balance=()=>revenue()-expenses();
+function updateTotals(){
+ const r=revenue(),e=expenses(),b=balance(),p=Number(state.previousBalance)||0,d=b-p;
+ document.getElementById('mRevenue').textContent=money(r);document.getElementById('mExpenses').textContent=money(e);document.getElementById('mBalance').textContent=money(b);
+ document.getElementById('mBalance').className='metric '+(b<0?'red':'gold');
+ document.getElementById('mMargin').textContent=(r?b/r*100:0).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+ document.getElementById('incomeTotal').textContent=money(r);document.getElementById('expenseTotal').textContent=money(e);document.getElementById('quickIncomeTotal').textContent=money(r);document.getElementById('quickExpenseTotal').textContent=money(e);
+ document.getElementById('previousLabel').textContent=state.previousMonth;document.getElementById('currentLabel').textContent=state.month;
+ document.getElementById('previousValue').textContent=money(p);document.getElementById('currentValue').textContent=money(b);
+ let title,icon,color,text;
+ if(b<0){title='Você está negativado';icon='↓';color='red';text='Seu saldo atual está abaixo de zero.'}
+ else if(d>0){title='Você cresceu!';icon='↗';color='gold';text='Você ficou '+money(d)+' acima do mês anterior.'}
+ else if(d<0){title='Você teve uma queda';icon='↘';color='red';text='Você ficou '+money(Math.abs(d))+' abaixo do mês anterior.'}
+ else{title='Resultado estável';icon='→';color='';text='Seu saldo ficou igual ao mês anterior.'}
+ ['','2'].forEach(s=>{document.getElementById('signalTitle'+s).textContent=title;document.getElementById('signalIcon'+s).textContent=icon;document.getElementById('signalText'+s).textContent=text;document.getElementById('variation'+s).textContent=(p?((d/Math.abs(p))*100).toLocaleString('pt-BR',{signDisplay:'always',maximumFractionDigits:1})+'%':money(d));document.getElementById('variation'+s).className='metric '+(b<0?'red':d>0?'gold':d<0?'red':'')});
+ document.getElementById('signalIcon').style.color=b<0?'var(--red)':d>0?'var(--gold)':d<0?'var(--red)':'var(--muted)';
+ document.getElementById('signalIcon2').style.color=b<0?'var(--red)':d>0?'var(--gold)':d<0?'var(--red)':'var(--muted)';
+ const goal=Math.max(0,Number(state.goal)||0),progress=goal?Math.max(0,b/goal*100):0;
+ document.getElementById('goalPercent').textContent=progress.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+ document.getElementById('goalBar').style.width=Math.min(100,progress)+'%';
+ document.getElementById('goalRemaining').textContent=goal?money(Math.max(0,goal-b))+' restantes para alcançar a meta.':'Defina sua meta para acompanhar o progresso.';
+ drawAll();
+}
+function buildCategories(){
+ const containers=[
+  [document.getElementById('incomeCategories'),incomeNames,state.income],
+  [document.getElementById('quickIncomeCategories'),incomeNames,state.income],
+  [document.getElementById('expenseCategories'),expenseNames,state.expenses],
+  [document.getElementById('quickExpenseCategories'),expenseNames,state.expenses]
+ ];
+ containers.forEach(([container,names,values])=>{
+  if(!container)return;
+  container.innerHTML='';
+  names.forEach((name,i)=>container.appendChild(categoryCard(name,values[i],v=>{
+   values[i]=v;save();updateTotals();
+   const group = values === state.income ? 'income' : 'expenses';
+   document.querySelectorAll('.category input').forEach(input=>{
+    const card=input.closest('.category');
+    if(card && card.dataset.group===group && card.querySelector('strong')?.textContent===name && Number(input.value)!==v) {
+     input.value=v;
+     const amountLabel=card.querySelector('.category-head span');
+     if(amountLabel) amountLabel.textContent=money(v);
+    }
+   });
+  }, values === state.income ? 'income' : 'expenses')));
+ });
+}
+function categoryCard(name,value,onChange,group){const d=document.createElement('div');d.className='category';d.dataset.group=group;const h=document.createElement('div');h.className='category-head';const n=document.createElement('strong');n.textContent=name;const val=document.createElement('span');val.textContent=money(value);h.append(n,val);const input=document.createElement('input');input.type='number';input.min='0';input.step='0.01';input.value=value;input.addEventListener('input',()=>{const v=Math.max(0,Number(input.value)||0);val.textContent=money(v);onChange(v)});d.append(h,input);return d}
+function draw(canvasId,labels,values,colors=null){const c=document.getElementById(canvasId);if(!c||c.offsetParent===null)return;const rect=c.getBoundingClientRect(),ratio=window.devicePixelRatio||1;c.width=rect.width*ratio;c.height=260*ratio;const ctx=c.getContext('2d');ctx.scale(ratio,ratio);const w=rect.width,h=260;ctx.clearRect(0,0,w,h);const max=Math.max(1,...values.map(Math.abs));const left=48,right=12,top=22,bottom=42,plotH=h-top-bottom,zeroY=top+plotH/2;ctx.font='11px system-ui';ctx.fillStyle='#999';ctx.strokeStyle='#3a3a3a';ctx.lineWidth=1;
+ for(let i=0;i<5;i++){const y=top+i*plotH/4;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke()}
+ const barW=Math.min(70,(w-left-right)/(labels.length*1.8));const slot=(w-left-right)/labels.length;
+ values.forEach((v,i)=>{const x=left+slot*i+(slot-barW)/2;const height=Math.abs(v)/max*(plotH*.42);const y=v>=0?zeroY-height:zeroY;ctx.fillStyle=colors?colors[i]:'#f5c928';ctx.fillRect(x,y,barW,Math.max(2,height));ctx.fillStyle='#eee';ctx.textAlign='center';ctx.fillText(shortMoney(v),x+barW/2,v>=0?Math.max(12,y-7):Math.min(h-25,y+height+14));ctx.fillStyle='#aaa';ctx.fillText(labels[i].length>12?labels[i].slice(0,11)+'…':labels[i],x+barW/2,h-13)});
+ ctx.strokeStyle='#777';ctx.beginPath();ctx.moveTo(left,zeroY);ctx.lineTo(w-right,zeroY);ctx.stroke()}
+function shortMoney(n){return 'R$'+(Math.abs(n)>=1000?(n/1000).toFixed(1)+'k':Math.round(n))}
+function drawAll(){draw('comparisonChart',[state.previousMonth,state.month],[Number(state.previousBalance)||0,balance()],['#777777','#f5c928']);draw('comparisonChart2',[state.previousMonth,state.month],[Number(state.previousBalance)||0,balance()],['#777777','#f5c928']);draw('cashChart',['Receitas','Despesas'],[revenue(),expenses()],['#f5c928','#777777']);draw('expenseChart',expenseNames,state.expenses)}
+function renderTransactions(){const body=document.getElementById('transactionRows');body.innerHTML='';document.getElementById('emptyTransactions').classList.toggle('hidden',state.transactions.length>0);state.transactions.forEach((t,i)=>{const tr=document.createElement('tr');[t.date||'—',t.description,t.type+' • '+t.category].forEach(x=>{const td=document.createElement('td');td.textContent=x;tr.append(td)});const td=document.createElement('td');td.className='right';td.textContent=(t.type==='Receita'?'+':'−')+money(t.value);tr.append(td);const del=document.createElement('td');const btn=document.createElement('button');btn.className='delete';btn.textContent='×';btn.title='Excluir lançamento';btn.onclick=()=>{state.transactions.splice(i,1);save();renderTransactions();updateTotals()};del.append(btn);tr.append(del);body.append(tr)});}
+function updateCategoryOptions(){const type=document.getElementById('type').value,select=document.getElementById('category');select.innerHTML='';(type==='Receita'?incomeNames:expenseNames).forEach(n=>{const o=document.createElement('option');o.textContent=n;select.append(o)})}
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('hidden',s.id!==btn.dataset.page));drawAll()}));
+document.getElementById('month').value=state.month;document.getElementById('month').addEventListener('change',e=>{state.month=e.target.value;save();updateTotals()});
+document.getElementById('goal').value=state.goal;document.getElementById('goal').addEventListener('input',e=>{state.goal=Number(e.target.value)||0;save();updateTotals()});
+document.getElementById('previousMonth').value=state.previousMonth;document.getElementById('previousMonth').addEventListener('input',e=>{state.previousMonth=e.target.value;save();updateTotals()});
+document.getElementById('previousBalance').value=state.previousBalance;document.getElementById('previousBalance').addEventListener('input',e=>{state.previousBalance=Number(e.target.value)||0;document.getElementById('quickPreviousBalance').value=e.target.value;save();updateTotals()});
+document.getElementById('quickPreviousMonth').addEventListener('input',e=>{state.previousMonth=e.target.value;document.getElementById('previousMonth').value=e.target.value;save();updateTotals()});
+document.getElementById('quickPreviousBalance').addEventListener('input',e=>{state.previousBalance=Number(e.target.value)||0;document.getElementById('previousBalance').value=e.target.value;save();updateTotals()});
+document.getElementById('type').addEventListener('change',updateCategoryOptions);
+document.getElementById('date').value=new Date().toISOString().slice(0,10);
+document.getElementById('addTransaction').addEventListener('click',()=>{const description=document.getElementById('description').value.trim(),value=Number(document.getElementById('amount').value);if(!description||!(value>0)){alert('Informe uma descrição e um valor maior que zero.');return}state.transactions.push({description,value,type:document.getElementById('type').value,category:document.getElementById('category').value,date:document.getElementById('date').value});save();document.getElementById('description').value='';document.getElementById('amount').value='';renderTransactions();updateTotals()});
+document.getElementById('reset').addEventListener('click',()=>{if(confirm('Restaurar os valores de demonstração? Isso apagará os lançamentos cadastrados.')){state=cloneData(demo);save();document.getElementById('month').value=state.month;document.getElementById('goal').value=state.goal;document.getElementById('previousMonth').value=state.previousMonth;document.getElementById('previousBalance').value=state.previousBalance;buildCategories();renderTransactions();updateTotals()}});
+document.getElementById('exportCsv').addEventListener('click',()=>{const rows=[['Data','Descrição','Tipo','Categoria','Valor'],...state.transactions.map(t=>[t.date,t.description,t.type,t.category,t.value])];const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(';')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lancamentos-financeiros.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)});
+
+function addChatMessage(text,who='bot'){
+ const box=document.getElementById('chatMessages');
+ const bubble=document.createElement('div');bubble.className='chat-bubble '+who;
+ bubble.textContent=text;box.appendChild(bubble);box.scrollTop=box.scrollHeight;
+}
+function parseChatNumber(raw){
+ let s=String(raw).trim().replace(/R\$\s?/gi,'').replace(/\s/g,'');
+ if(s.includes(',') && s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
+ else if(s.includes(',')) s=s.replace(',','.');
+ else if((s.match(/\./g)||[]).length>1) s=s.replace(/\./g,'');
+ return Number(s);
+}
+function syncAllInputs(){
+ document.getElementById('month').value=state.month;
+ document.getElementById('goal').value=state.goal;
+ document.getElementById('previousMonth').value=state.previousMonth;
+ document.getElementById('previousBalance').value=state.previousBalance;
+ document.getElementById('quickPreviousMonth').value=state.previousMonth;
+ document.getElementById('quickPreviousBalance').value=state.previousBalance;
+ buildCategories();save();updateTotals();
+}
+function handleFinanceChat(message){
+ const original=message.trim();
+ const lower=original.toLocaleLowerCase('pt-BR');
+ let changed=[];
+ const settings=[
+  {re:/(?:meta(?: financeira)?|objetivo)\s*(?:para|de|é|:)?\s*(?:r\$\s*)?([\d.,]+)/i,apply:m=>{state.goal=parseChatNumber(m[1]);changed.push('Meta: '+money(state.goal));}},
+  {re:/(?:saldo anterior|saldo do mês anterior)\s*(?:para|de|é|:)?\s*(?:r\$\s*)?([\d.,]+)/i,apply:m=>{state.previousBalance=parseChatNumber(m[1]);changed.push('Saldo anterior: '+money(state.previousBalance));}},
+  {re:/(?:mês atual|mes atual)\s*(?:para|:|é)?\s*([a-zçãéô]+\s+\d{4})/i,apply:m=>{state.month=m[1].replace(/\b\w/g,c=>c.toUpperCase());changed.push('Mês atual: '+state.month);}},
+  {re:/(?:mês anterior|mes anterior)\s*(?:para|:|é)?\s*([a-zçãéô]+\s+\d{4})/i,apply:m=>{state.previousMonth=m[1].replace(/\b\w/g,c=>c.toUpperCase());changed.push('Mês anterior: '+state.previousMonth);}}
+ ];
+ settings.forEach(s=>{const m=original.match(s.re);if(m)s.apply(m)});
+ const all=[...incomeNames.map(n=>({name:n,type:'income'})),...expenseNames.map(n=>({name:n,type:'expenses'}))];
+ const used=new Set();
+ all.forEach(item=>{
+  const escaped=item.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const re=new RegExp('(?:^|[;\\n,])?\\s*(?:(receita|receitas|entrada|despesa|despesas|gasto)\\s+)?'+escaped+'\\s*(?:para|de|é|:)?\\s*(?:r\\$\\s*)?([\\d.]+(?:,[\\d]{1,2})?|[\\d]+(?:\\.[\\d]{1,2})?)','i');
+  const m=original.match(re);
+  if(!m)return;
+  const explicit=(m[1]||'').toLocaleLowerCase('pt-BR');
+  let type=item.type;
+  if(explicit){
+   if(['receita','receitas','entrada'].includes(explicit)) type='income';
+   else type='expenses';
+   if(type!==item.type) return;
+  } else if(item.name==='Cartas'||item.name==='Outros'){
+   const key=item.name.toLowerCase();
+   if(used.has(key))return;
+   const near=lower.slice(Math.max(0,m.index-16),m.index+item.name.length+8);
+   if(/receita|entrada/.test(near))type='income';
+   else if(/despesa|gasto/.test(near))type='expenses';
+   else return;
+   used.add(key);
+  }
+  const list=type==='income'?incomeNames:expenseNames;
+  const idx=list.findIndex(n=>n.toLocaleLowerCase('pt-BR')===item.name.toLocaleLowerCase('pt-BR'));
+  if(idx<0)return;
+  const value=parseChatNumber(m[2]);
+  if(!Number.isFinite(value)||value<0)return;
+  state[type][idx]=value;
+  changed.push((type==='income'?'Receita':'Despesa')+' • '+item.name+': '+money(value));
+ });
+ if(changed.length){
+  syncAllInputs();
+  return 'Pronto! Atualizei '+changed.length+' item(ns): '+changed.join(' | ')+'. Os gráficos e o saldo já foram recalculados.';
+ }
+ return 'Não identifiquei valores para alterar. Tente, por exemplo: “salário para 9500; comida para 1200; meta para 15000”. Para Cartas e Outros, informe “receita” ou “despesa” antes do nome.';
+}
+const chatHistory=[];
+function financeSnapshot(){
+ return {
+  month:state.month, previousMonth:state.previousMonth,
+  previousBalance:Number(state.previousBalance)||0, goal:Number(state.goal)||0,
+  income:Object.fromEntries(incomeNames.map((n,i)=>[n,Number(state.income[i])||0])),
+  expenses:Object.fromEntries(expenseNames.map((n,i)=>[n,Number(state.expenses[i])||0])),
+  transactions:(state.transactions||[]).slice(-80).map(t=>({
+   description:String(t.description||'').slice(0,100),type:t.type,
+   category:t.category,value:Number(t.value)||0,date:t.date
+  })),
+  totals:{revenue:revenue(),expenses:expenses(),balance:balance()}
+ };
+}
+function applyAssistantActions(actions){
+ const allowedIncome=incomeNames, allowedExpenses=expenseNames;
+ const changes=[];
+ for(const a of (Array.isArray(actions)?actions:[])){
+  if(!a||typeof a!=='object')continue;
+  if(a.type==='set_income'){
+   const i=allowedIncome.indexOf(a.category),v=Number(a.value);
+   if(i>=0&&Number.isFinite(v)&&v>=0&&v<=100000000){state.income[i]=v;changes.push('Receita '+a.category+' → '+money(v));}
+  }else if(a.type==='set_expense'){
+   const i=allowedExpenses.indexOf(a.category),v=Number(a.value);
+   if(i>=0&&Number.isFinite(v)&&v>=0&&v<=100000000){state.expenses[i]=v;changes.push('Despesa '+a.category+' → '+money(v));}
+  }else if(a.type==='set_goal'){
+   const v=Number(a.value);if(Number.isFinite(v)&&v>=0&&v<=100000000){state.goal=v;changes.push('Meta → '+money(v));}
+  }else if(a.type==='set_previous_balance'){
+   const v=Number(a.value);if(Number.isFinite(v)&&Math.abs(v)<=100000000){state.previousBalance=v;changes.push('Saldo anterior → '+money(v));}
+  }else if(a.type==='set_month'&&typeof a.value==='string'&&a.value.length<=40){
+   state.month=a.value;changes.push('Mês atual → '+a.value);
+  }else if(a.type==='set_previous_month'&&typeof a.value==='string'&&a.value.length<=40){
+   state.previousMonth=a.value;changes.push('Mês anterior → '+a.value);
+  }else if(a.type==='add_transaction'){
+   const v=Number(a.value),type=a.transactionType,category=String(a.category||'');
+   const valid=(type==='Receita'&&[...allowedIncome,'Outros'].includes(category))||(type==='Despesa'&&[...allowedExpenses,'Outros'].includes(category));
+   if(valid&&Number.isFinite(v)&&v>0&&v<=100000000){
+    state.transactions.push({description:String(a.description||'Lançamento via chat').slice(0,100),value:v,type,category,date:new Date().toISOString().slice(0,10)});
+    changes.push('Lançamento '+type+' • '+category+' → '+money(v));
+   }
+  }
+ }
+ if(changes.length){syncAllInputs();renderTransactions();}
+ return changes;
+}
+document.getElementById('chatForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const input=document.getElementById('chatInput');
+ const message=input.value.trim();
+ const accessCode=document.getElementById('chatAccessCode').value.trim();
+ if(!message)return;
+ if(!accessCode){addChatMessage('Digite o código privado de acesso configurado na hospedagem para conectar à IA.');return;}
+ addChatMessage(message,'user');input.value='';
+ const send=document.getElementById('chatSend');send.disabled=true;send.textContent='...';
+ try{
+  const response=await fetch('/api/chat',{
+   method:'POST',headers:{'Content-Type':'application/json','X-Chat-Access-Code':accessCode},
+   body:JSON.stringify({message,history:chatHistory.slice(-10),finance:financeSnapshot()})
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Não foi possível conectar à IA.');
+  const reply=String(data.reply||'Não consegui gerar uma resposta.').slice(0,5000);
+  chatHistory.push({role:'user',content:message},{role:'assistant',content:reply});
+  addChatMessage(reply);
+  if(Array.isArray(data.actions)&&data.actions.length){
+   const preview=data.actions.map(a=>a.description||a.type).join('\n• ');
+   if(confirm('A IA sugeriu estas alterações:\n\n• '+preview+'\n\nDeseja aplicar no Finance Control?')){
+    const applied=applyAssistantActions(data.actions);
+    addChatMessage(applied.length?'Alterações aplicadas:\n• '+applied.join('\n• '):'Nenhuma alteração válida foi aplicada.');
+   }else addChatMessage('Tudo certo — não alterei seus dados.');
+  }
+ }catch(err){
+  addChatMessage('Não consegui falar com a IA: '+err.message+' Confira a conexão e o código de acesso.');
+ }finally{send.disabled=false;send.textContent='Enviar';}
+});
+
+window.addEventListener('resize',()=>drawAll());
+document.getElementById('quickPreviousMonth').value=state.previousMonth;document.getElementById('quickPreviousBalance').value=state.previousBalance;buildCategories();updateCategoryOptions();renderTransactions();updateTotals();
+</script>
+</body>
+</html>

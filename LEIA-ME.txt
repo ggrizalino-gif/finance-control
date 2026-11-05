@@ -1,0 +1,32 @@
+# Finance Control AI — pacote de implantação
+
+Este pacote contém o dashboard e uma API serverless para conversar com a OpenAI sem expor a chave no navegador.
+
+## Antes de publicar
+Como a configuração de uma API pode envolver conta, cobrança e dados financeiros, peça a um responsável adulto para criar e administrar as contas e inserir as credenciais. Não compartilhe a chave da API no chat nem a coloque no HTML.
+
+## Publicação
+1. Publique esta pasta em um projeto Vercel (a pasta contém `vercel.json`, `api/chat.js` e `public/index.html`).
+2. Nas configurações do projeto, adicione estas variáveis de ambiente:
+   - `OPENAI_API_KEY`: chave privada da API OpenAI.
+   - `CHAT_ACCESS_CODE`: código privado criado para proteger o endpoint do chat.
+   - `OPENAI_MODEL`: modelo disponível na sua conta; o padrão do projeto é `gpt-6-astra`.
+3. Faça um novo deploy após salvar as variáveis.
+4. Abra o endereço HTTPS publicado no Safari.
+5. Na aba “Chat financeiro”, digite o mesmo `CHAT_ACCESS_CODE` configurado no servidor.
+
+## Como funciona
+- O navegador envia os valores atuais do painel e a pergunta para `/api/chat`.
+- O servidor chama a Responses API da OpenAI.
+- A IA pode sugerir alterações estruturadas.
+- O dashboard pede confirmação antes de aplicar qualquer alteração.
+- Os dados do painel continuam salvos localmente no navegador, como na versão anterior.
+
+## Privacidade e segurança
+- Não envie senhas, números de conta, documentos, endereço ou outros dados pessoais.
+- A chave OpenAI fica somente nas variáveis de ambiente do servidor.
+- O código de acesso impede chamadas simples não autorizadas, mas não substitui autenticação completa para um produto público. Mantenha o projeto privado e revise uso/custos da API.
+- O serviço de IA pode ter custos e limites próprios; verifique-os com o responsável pela conta.
+
+## Observações
+Este pacote está preparado para implantação, mas ainda precisa que as contas e variáveis de ambiente sejam configuradas. A conexão não fica ativa automaticamente só por baixar o ZIP.
